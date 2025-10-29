@@ -1,0 +1,27 @@
+{
+  "name": "swdppro",
+  "version": "1.0.0",
+  "description": "��#\u0000 \u0000b\u0000a\u0000c\u0000k\u0000e\u0000n\u0000d\u0000\r\u0000 \u0000",
+  "homepage": "https://github.com/SWDP-F2/backend#readme",
+  "bugs": {
+    "url": "https://github.com/SWDP-F2/backend/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SWDP-F2/backend.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}
