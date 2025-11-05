@@ -33,6 +33,12 @@ app.use(cors());
 
 app.set("query parser", "extended");
 
+const rooms = require("./routes/rooms");
+
+app.use("/api/v1/rooms", rooms);
+
+
+
 const PORT = process.env.PORT || 5000;
 const server = app.listen(
   PORT,
