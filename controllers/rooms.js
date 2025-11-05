@@ -71,5 +71,3 @@ exports.getRooms = async (req, res, next) => {
 //desc Get single room
 //route GET /api/v1/rooms/:id
 //access Public
-
-exports.getRoom = async (req, res, next) => {
