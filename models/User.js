@@ -37,4 +37,11 @@ const userSchema = new mongoose.Schema({
     resetPasswordExpire: Date,
 });
 
+userSchema.virtual('reservations', {
+    ref: 'Reservation',
+    localField: '_id',
+    foreignField: 'user',
+    justOne: false
+});
+
 module.exports = mongoose.model('User', userSchema);

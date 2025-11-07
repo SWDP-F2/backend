@@ -71,3 +71,61 @@ exports.getRooms = async (req, res, next) => {
 //desc Get single room
 //route GET /api/v1/rooms/:id
 //access Public
+exports.getRoom = async (req, res, next) => {
+    try {
+        const room = await Room.findById(req.params.id);
+        if (!room) {
+            return res.status(404).json({ success: false, message: 'Room not found' });
+        }
+        res.status(200).json({ success: true, data: room });
+    } catch (err) {
+        res.status(400).json({ success: false });
+    }
+}
+
+//desc Create new room
+//route POST /api/v1/rooms
+//access Private
+exports.createRoom = async (req, res, next) => {    
+    try {
+        const room = await Room.create(req.body);
+        res.status(201).json({ success: true, data: room });
+    } catch (err) {
+        res.status(400).json({ success: false });
+    }
+}
+//desc Update room
+//route PUT /api/v1/rooms/:id
+//access Private
+exports.updateRoom = async (req, res, next) => {
+    try {
+        let room = await Room.findById(req.params.id);
+        if (!room) {
+            return res.status(404).json({ success: false, message: 'Room not found' });
+        }
+        room = await Room.findByIdAndUpdate(req
+.params.id, req.body, {
+            new: true,
+            runValidators: true
+        });
+        res.status(200).json({ success: true, data: room });
+    } catch (err) {
+        res.status(400).json({ success: false });
+    }
+}
+
+//desc Delete room
+//route DELETE /api/v1/rooms/:id
+//access Private
+exports.deleteRoom = async (req, res, next) => {
+    try {
+        const room = await Room.findById(req.params.id);
+        if (!room) {
+            return res.status(404).json({ success: false, message: 'Room not found' });
+        }
+        await room.deleteOne({_id: req.params.id});
+        res.status(200).json({ success: true, data: {} });
+    } catch (err) {
+        res.status(400).json({ success: false });
+    }
+}
