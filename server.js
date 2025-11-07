@@ -34,10 +34,12 @@ app.use(cors());
 app.set("query parser", "extended");
 
 const rooms = require("./routes/rooms");
+const reservations = require("./routes/reservations");
+const auth = require("./routes/auth");
 
 app.use("/api/v1/rooms", rooms);
-
-
+app.use("/api/v1/reservations", reservations);
+app.use("/api/v1/auth", auth);
 
 const PORT = process.env.PORT || 5000;
 const server = app.listen(

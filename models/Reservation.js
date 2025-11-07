@@ -20,6 +20,10 @@ const reservationSchema = new mongoose.Schema({
         enum: ['active', 'inactive'],
         default: 'active',
         required: true
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
     }
 }); 
 
