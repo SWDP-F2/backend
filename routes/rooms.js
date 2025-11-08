@@ -8,15 +8,17 @@ const {
     deleteRoom
 } = require('../controllers/rooms');
 
+const { protect, authorize } = require("../middleware/auth");
+
 router
     .route('/')
-    .get(getRooms)
-    .post(createRoom);
+    .get(protect, getRooms)
+    .post(protect, authorize('admin'), createRoom);
 router
     .route('/:id')
-    .get(getRoom)
-    .put(updateRoom)
-    .delete(deleteRoom);
+    .get(protect, getRoom)
+    .put(protect, authorize('admin'), updateRoom)
+    .delete(protect, authorize('admin'), deleteRoom);
 
 module.exports = router;
 

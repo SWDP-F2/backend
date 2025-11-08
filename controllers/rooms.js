@@ -1,5 +1,5 @@
 const Room = require('../models/Room');
-
+const Reservation = require('../models/Reservation');
 
 //desc Get all rooms
 //route GET /api/v1/rooms
@@ -103,8 +103,7 @@ exports.updateRoom = async (req, res, next) => {
         if (!room) {
             return res.status(404).json({ success: false, message: 'Room not found' });
         }
-        room = await Room.findByIdAndUpdate(req
-.params.id, req.body, {
+        room = await Room.findByIdAndUpdate(req.params.id, req.body, {
             new: true,
             runValidators: true
         });
@@ -123,7 +122,9 @@ exports.deleteRoom = async (req, res, next) => {
         if (!room) {
             return res.status(404).json({ success: false, message: 'Room not found' });
         }
-        await room.deleteOne({_id: req.params.id});
+        await room.deleteOne();
+        //Delete all reservations for this room
+        await Reservation.deleteMany({ room: req.params.id });
         res.status(200).json({ success: true, data: {} });
     } catch (err) {
         res.status(400).json({ success: false });
