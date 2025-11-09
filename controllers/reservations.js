@@ -56,6 +56,28 @@ exports.getReservations = async (req, res, next) => {
     }
 }
 
+//desc Get active reservations
+//route GET /api/v1/reservations/active
+//access Public
+exports.getActiveReservations = async (req, res, next) => {
+    try {
+        // Update expired reservations
+        await updateExpiredReservations();
+
+        let query;
+        if(req.user.role !== 'admin'){
+            query = Reservation.find({ user: req.user.id, status: 'active' });
+        } else {
+            query = Reservation.find({ status: 'active' });
+        }
+
+        const reservations = await query;
+        res.status(200).json({ success: true, count: reservations.length, data: reservations });
+    } catch (err) {
+        res.status(400).json({ success: false, error: 'Cannot find reservations' });
+    }
+}
+
 //desc Get single reservation
 //route GET /api/v1/reservations/:id
 //access Public
