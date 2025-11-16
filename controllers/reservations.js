@@ -78,7 +78,7 @@ exports.getActiveReservations = async (req, res, next) => {
     }
 }
 
-//desc Get single reservation
+//desc Get single reservation 
 //route GET /api/v1/reservations/:id
 //access Public
 exports.getReservation = async (req, res, next) => {
