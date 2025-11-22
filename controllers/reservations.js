@@ -1,23 +1,27 @@
 const Reservation = require('../models/Reservation');
 const Room = require('../models/Room');
+const CurrentDate = require('../models/CurrentDate');
 
-// Global variable for current date (for testing purposes)
-let currentDate = null;
-
-// Helper function to get current date
-const getCurrentDate = () => {
-    if (currentDate) {
-        return new Date(currentDate);
+// Helper function to get current date from MongoDB
+exports.getCurrentDate = async (req, res) => {
+    try {
+        let query = await CurrentDate.findOne();
+        if (!query) {
+            const now = new Date();
+            now.setHours(0, 0, 0, 0);
+            return res.status(200).json({ success: true, currentDate: now });
+        }
+        return res.status(200).json({ success: true, currentDate: query.date });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, error: 'Server error' });
     }
-    const now = new Date();
-    now.setHours(0, 0, 0, 0);
-    return now;
 };
 
 // Function to update expired reservations
 const updateExpiredReservations = async () => {
     try {
-        const today = getCurrentDate();
+        const today = await exports.getCurrentDate();
         const result = await Reservation.updateMany(
             {
                 status: 'active',
@@ -39,7 +43,6 @@ const updateExpiredReservations = async () => {
 //access Public
 exports.getReservations = async (req, res, next) => {
     try {
-        // Update expired reservations
         await updateExpiredReservations();
         
         let query;
@@ -61,7 +64,6 @@ exports.getReservations = async (req, res, next) => {
 //access Public
 exports.getActiveReservations = async (req, res, next) => {
     try {
-        // Update expired reservations
         await updateExpiredReservations();
 
         let query;
@@ -83,7 +85,6 @@ exports.getActiveReservations = async (req, res, next) => {
 //access Public
 exports.getReservation = async (req, res, next) => {
     try {
-        // Update expired reservations
         await updateExpiredReservations();
         
         let query;
@@ -115,7 +116,6 @@ exports.getReservation = async (req, res, next) => {
 //access Public
 exports.getReservationsByUser = async (req, res, next) => {
     try {
-        // Update expired reservations
         await updateExpiredReservations();
         
         let query;
@@ -140,7 +140,6 @@ exports.getReservationsByUser = async (req, res, next) => {
 //access Public
 exports.getReservationsByRoom = async (req, res, next) => {
     try {
-        // Update expired reservations
         await updateExpiredReservations();
         
         const reservations = await Reservation.find({ room: req.params.roomId });
@@ -155,28 +154,24 @@ exports.getReservationsByRoom = async (req, res, next) => {
 //access Private
 exports.createReservation = async (req, res, next) => {    
     try {
-        // Update expired reservations
         await updateExpiredReservations();
         
         if (req.user.role !== 'admin' && req.body.user !== req.user.id) {
             return res.status(401).json({ success: false, message: 'Not authorized to create reservation for this user' });
         }
-        // Process the date to remove time component
         if (req.body.date) {
             const inputDate = new Date(req.body.date);
-            inputDate.setHours(0, 0, 0, 0); // Set time to 00:00:00
+            inputDate.setHours(0, 0, 0, 0);
             req.body.date = inputDate;
         }
-        //Check that the date is not in the past
-        if (req.body.date < getCurrentDate()) {
+        const currentDate = await exports.getCurrentDate();
+        if (req.body.date < currentDate) {
             return res.status(400).json({ success: false, message: 'Cannot create reservation for a past date' });
         }
-        //Check that the room exists
         const roomExists = await Room.findById(req.body.room);
         if (!roomExists) {
             return res.status(404).json({ success: false, message: 'Room not found' });
         }
-        //Check that the room is available for the requested dates could be added here
         const existingReservation = await Reservation.findOne({
             room: req.body.room,
             date: req.body.date
@@ -187,7 +182,6 @@ exports.createReservation = async (req, res, next) => {
             }
             return res.status(400).json({ success: false, message: 'Room is already booked for the selected date' });
         }
-        //Check that the user is not booking more that 3 reservations
         const userReservationsCount = await Reservation.countDocuments({ user: req.body.user, status: 'active' });
         if (userReservationsCount >= 3) {
             return res.status(400).json({ success: false, message: 'User cannot have more than 3 active reservations' });
@@ -204,7 +198,6 @@ exports.createReservation = async (req, res, next) => {
 //access Private
 exports.updateReservation = async (req, res, next) => {
     try {
-        // Update expired reservations
         await updateExpiredReservations();
         
         let reservation = await Reservation.findById(req.params.id);
@@ -220,17 +213,15 @@ exports.updateReservation = async (req, res, next) => {
         if (req.body.room && req.body.room !== reservation.room.toString()) {
             return res.status(400).json({ success: false, message: 'Cannot change the room of the reservation' });
         }
-        // Process the date to remove time component
         if (req.body.date) {
             const inputDate = new Date(req.body.date);
-            inputDate.setHours(0, 0, 0, 0); // Set time to 00:00:00
+            inputDate.setHours(0, 0, 0, 0);
             req.body.date = inputDate;
         }
-        //Check that the date is not in the past
-        if (req.body.date < getCurrentDate()) {
+        const currentDate = await exports.getCurrentDate();
+        if (req.body.date < currentDate) {
             return res.status(400).json({ success: false, message: 'Cannot set reservation to a past date' });
         }
-        //Check that the room is available for the requested dates could be changed here
         const existingReservation = await Reservation.findOne({
             room: reservation.room,
             date: req.body.date
@@ -256,7 +247,6 @@ exports.updateReservation = async (req, res, next) => {
 //access Private
 exports.deleteReservation = async (req, res, next) => {
     try {
-        // Update expired reservations
         await updateExpiredReservations();
         
         const reservation = await Reservation.findById(req.params.id);
@@ -273,23 +263,36 @@ exports.deleteReservation = async (req, res, next) => {
     }
 }
 
+
 //desc Set current date for testing
-//route POST /api/v1/reservations/set-current-date
-//access Public (for testing)
-exports.setCurrentDate = async (req, res, next) => {
+//route PUT /api/v1/reservations/current-date
+//access 
+exports.putCurrentDate = async (req, res, next) => {
     try {
         const { date } = req.body;
-        if (date) {
-            currentDate = new Date(date);
-            currentDate.setHours(0, 0, 0, 0);
-        } else {
-            currentDate = null; // Reset to real current date
+        let dateRecord = await CurrentDate.findOne();
+        
+        if (!dateRecord) {
+            dateRecord = new CurrentDate();
         }
         
+        if (date) {
+            const newDate = new Date(date);
+            newDate.setHours(0, 0, 0, 0);
+            dateRecord.date = newDate;
+        } else {
+            const now = new Date();
+            now.setHours(0, 0, 0, 0);
+            dateRecord.date = now;
+        }
+        
+        await dateRecord.save();
+        await updateExpiredReservations();
+
         res.status(200).json({ 
             success: true, 
             message: date ? 'Current date set for testing' : 'Reset to real current date',
-            currentDate: getCurrentDate()
+            data: dateRecord
         });
     } catch (err) {
         res.status(400).json({ success: false, error: 'Failed to set current date' });

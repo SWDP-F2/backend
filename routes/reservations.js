@@ -1,5 +1,5 @@
 const express = require("express");
-const {getReservations, getReservation, getReservationsByUser, getReservationsByRoom, createReservation, updateReservation, deleteReservation, setCurrentDate, getActiveReservations} = require("../controllers/reservations");
+const {getReservations, getReservation, getReservationsByUser, getReservationsByRoom, createReservation, updateReservation, deleteReservation,getCurrentDate, putCurrentDate, getActiveReservations} = require("../controllers/reservations");
 
 const router = express.Router();
 
@@ -12,9 +12,6 @@ router.route("/")
 router.route("/active")
     .get(protect, getActiveReservations);
 
-router.route("/set-current-date")
-    .post(setCurrentDate);
-
 router.route("/user/:userId")
     .get(protect, getReservationsByUser);
 
@@ -25,5 +22,11 @@ router.route("/:id")
     .get(protect, getReservation)
     .put(protect, updateReservation)
     .delete(protect, deleteReservation);
+
+
+router.route("/current-date")
+    .get(protect,getCurrentDate)
+    .put(protect,putCurrentDate);
+
 
 module.exports = router;

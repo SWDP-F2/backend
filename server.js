@@ -28,7 +28,9 @@ const limiter = rateLimit({
   max: 100,
 });
 app.use(limiter);
-app.use(cors());
+app.use(cors(
+  { origin: 'http://localhost:5173', credentials: true }
+));
 
 
 app.set("query parser", "extended");
