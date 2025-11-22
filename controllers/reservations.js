@@ -2,6 +2,7 @@ const Reservation = require('../models/Reservation');
 const Room = require('../models/Room');
 const CurrentDate = require('../models/CurrentDate');
 const { updateExpiredReservations, getCurrentDateValue } = require('../utils/dateHelpers');
+const { getCurrentDate } = require('./currentDate');
 
 //desc Get all reservations
 //route GET /api/v1/reservations
@@ -129,8 +130,8 @@ exports.createReservation = async (req, res, next) => {
             inputDate.setHours(0, 0, 0, 0);
             req.body.date = inputDate;
         }
-        const currentDate = await exports.getCurrentDate();
-        if (req.body.date < currentDate) {
+        const currentDateValue = await getCurrentDateValue();
+        if (req.body.date < currentDateValue) {
             return res.status(400).json({ success: false, message: 'Cannot create reservation for a past date' });
         }
         const roomExists = await Room.findById(req.body.room);
@@ -183,8 +184,8 @@ exports.updateReservation = async (req, res, next) => {
             inputDate.setHours(0, 0, 0, 0);
             req.body.date = inputDate;
         }
-        const currentDate = await exports.getCurrentDate();
-        if (req.body.date < currentDate) {
+        const currentDateValue = await getCurrentDateValue();
+        if (req.body.date < currentDateValue) {
             return res.status(400).json({ success: false, message: 'Cannot set reservation to a past date' });
         }
         const existingReservation = await Reservation.findOne({
