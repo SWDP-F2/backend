@@ -8,9 +8,9 @@ exports.getCurrentDate = async (req, res) => {
         if (!query) {
             const now = new Date();
             now.setHours(0, 0, 0, 0);
-            return res.status(200).json({ success: true, currentDate: now });
+            return res.status(200).json({ success: true, currentDate: now.toISOString() });
         }
-        return res.status(200).json({ success: true, currentDate: query.date });
+        return res.status(200).json({ success: true, currentDate: new Date(query.date).toISOString() });
     } catch (err) {
         console.error(err);
         res.status(500).json({ success: false, error: 'Server error' });
