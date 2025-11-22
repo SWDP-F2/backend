@@ -61,7 +61,7 @@ exports.getReservations = async (req, res, next) => {
 
 //desc Get active reservations
 //route GET /api/v1/reservations/active
-//access Public
+//access Public 
 exports.getActiveReservations = async (req, res, next) => {
     try {
         await updateExpiredReservations();
